@@ -1,6 +1,7 @@
 from ImageData import BBox
 
 import numpy as np
+import cv2
 from numba import njit
 
 def applyBoundingBox(im, bbs):
@@ -28,3 +29,11 @@ def mask3Dwith2D(im, mask, copy=True):
     mask_3d = get3Dmask(mask)
     im[~mask_3d] = 0
     return im
+
+def dilate(image, k=3, i=3):
+    kernel = np.ones((k,k),np.uint8)
+    return cv2.dilate(image, kernel, iterations=i)
+
+def erode(image, k=3, i=3):
+    kernel = np.ones((k,k),np.uint8)
+    return cv2.erode(image, kernel, iterations=i)

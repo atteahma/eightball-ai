@@ -1,6 +1,7 @@
 from ImageData import BBox
 from Utils import applyBoundingBox
 
+import numpy as np
 
 class Cropper:
 
@@ -15,6 +16,12 @@ class Cropper:
         self.rawToTableBBox = None
         self.tableToSurfaceBBox = None
 
+    def rawToTable(self, im):
+        if self.rawToTableBBox is None or self.tableToSurfaceBBox is None:
+            self.computeAbsoluteBBox(*im.shape[:2])
+        
+        return applyBoundingBox(im, [self.rawToTableBBox])
+
     def rawToSurface(self, im):
         if self.rawToTableBBox is None or self.tableToSurfaceBBox is None:
             self.computeAbsoluteBBox(*im.shape[:2])
@@ -27,3 +34,17 @@ class Cropper:
 
         (xL, xR), (yT, yB) = Cropper.tableToSurfaceBBoxFL
         self.tableToSurfaceBBox = BBox((int(h*yT), int(w*xL)), (int(h*yB), int(w*xR)))
+    
+    def convertSurfaceToTable(self, pts):
+
+        if type(pts) != np.ndarray:
+            pts = np.array(pts)
+
+        origShape = pts.shape
+        tempShape = (np.prod(pts.shape[:-1]), 2)
+
+        ptsFlat = pts.reshape(tempShape)
+        
+        tablePts = ptsFlat + np.array(self.tableToSurfaceBBox.topLeft[::-1])
+
+        return tablePts.reshape(origShape)

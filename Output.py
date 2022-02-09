@@ -10,6 +10,7 @@ class Output:
         self.winName = winName
         self.frameQueue = Queue()
         self.run = True
+        self.catchup = False
         self.winThread = threading.Thread(target=self.outputWindowLoop, args=(), daemon=True)
 
     def outputWindowLoop(self):
@@ -18,8 +19,11 @@ class Output:
             self.frameQueue = Queue()
             frame = self.frameQueue.get() # is blocking
             cv2.imshow(self.winName, frame)
-            if cv2.waitKey(5) == 27:
+            key = cv2.waitKey(5)
+            if key == 27:
                 self.stopOutput()
+            if key == ord('s'):
+                self.catchup = not self.catchup
 
     def imshow(self, im):
         self.frameQueue.put(im)
