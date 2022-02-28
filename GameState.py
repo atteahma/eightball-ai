@@ -149,7 +149,8 @@ class GameState:
         if len(turnStarts) == 0:
             turnStartIndex = len(dataTS)
         else:
-            turnStartIndex = max(turnStarts[0] - 2, 0)
+            return -1
+            #turnStartIndex = max(turnStarts[0] - 2, 0)
         dataTS = dataTS[:turnStartIndex , :]
         if len(dataTS) < minDataPoints:
             return -1

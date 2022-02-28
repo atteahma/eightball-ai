@@ -4,6 +4,7 @@ from FrameCapture import FrameCapture
 from GameState import GameState
 from LineExtractor import LineExtractor
 from LineRasterizer import LineRasterizer
+from Tracker import Tracker
 
 from rdr2_ai.configWindow.configWindow import ConfigWindow
 from rdr2_ai.configWindow.configWindowTemplate import ConfigWindowTemplate, ContentType
@@ -17,7 +18,7 @@ from time import time, sleep
 
 
 configWindowTemplate = ConfigWindowTemplate() \
-    .setSize(1200,2000) \
+    .setSize(1200,2600) \
     .addStaticText('Foreground', (25,25), (50,800)) \
     .addContentBox('fg', ContentType.Image, (100,25), (400,800)) \
     .addStaticText('Lines (shaky)', (525,25), (50,800)) \
@@ -33,14 +34,15 @@ configWindowTemplate = ConfigWindowTemplate() \
     .addStaticText('Time Left:', (150, 875), (40, 200)) \
     .addContentBox('timeLeft', ContentType.Text, (150, 875 + 200 + 25), (40, 200)) \
     .addStaticText('Est Time Left:', (150, 875 + 200 + 25 + 200 + 25), (40, 200)) \
-    .addContentBox('estTimeLeft', ContentType.Text, (150, 875 + 200 + 25 + 200 + 25), (40, 200)) \
+    .addContentBox('estTimeLeft', ContentType.Text, (150, 875 + 200 + 25 + 200 + 25 + 200 + 25), (40, 200)) \
     .addContentBox('timer', ContentType.Image, (200, 875), (300, 300)) \
     .addContentBox('progressbar', ContentType.Image, (200, 875+300+25), (25, 500)) \
     .addContentBox('progressbarthresh', ContentType.Image, (250, 875+300+25), (25, 500)) \
-    .addContentBox('timelefthistory', ContentType.Plot, (600, 875), (350,800)) \
     \
-    .addContentBox('fps', ContentType.Text, (25, 1800), (40, 80)) \
-    .addStaticText('FPS', (25, 1900), (40, 80)) \
+    .addContentBox('fps', ContentType.Text, (25, 2600-200), (40, 75)) \
+    .addStaticText('FPS', (25, 2600-100), (40, 75)) \
+    \
+    .addContentBox('tracker', ContentType.Image, (600, 2600-25-1200), (600, 1200)) \
 
 
 class Main:
@@ -58,6 +60,7 @@ class Main:
         self.lineExtractor = LineExtractor()
         self.lineRasterizer = LineRasterizer(configWindow=self.configWindow)
         self.fpsCounter = FPSCounter(configWindow=self.configWindow)
+        self.tracker = Tracker(configWindow=self.configWindow)
 
     def runLoop(self, maxFPS=15):
         self.configWindow.startLoop()
@@ -75,6 +78,7 @@ class Main:
 
             # compute and draw things
             self.doShaky(phoneFrame)
+            self.doTracker(phoneFrame)
             
             if self.configWindow.done():
                 break
@@ -83,6 +87,10 @@ class Main:
             self.fpsCounter.sleep(maxFPS)
         
         self.configWindow.endLoop()
+
+    def doTracker(self, phoneFrame):
+        tableFrame = self.cropper.rawToTable(phoneFrame)
+        self.tracker.update(tableFrame)
 
     def doShaky(self, phoneFrame):
         # extract moving parts
