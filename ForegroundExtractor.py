@@ -9,17 +9,27 @@ from time import time
 
 class ForegroundExtractor:
 
-    def __init__(self):
-        self.learnRate = 0.00025 # assumes 10 fps
+    def __init__(self, configWindow=None):
+        self.configWindow = configWindow
+        self.ballsLearnRate = 0.05
+        self.aimLearnRate = 0.00001
         self.backSub = cv2.createBackgroundSubtractorMOG2()
         self.lastUpdateTime = time()
 
-    def update(self, im):
-        lrSuggested = self.learnRate * ((time() - self.lastUpdateTime)/0.1)
-        self.lastUpdateTime = time()
-        lr = min(0.1, lrSuggested)
+    def update(self, im, isAiming):
+        lr = self.aimLearnRate if isAiming else self.ballsLearnRate
+        
         fgMask = self.backSub.apply(im, learningRate=lr)
-        return cv2.bitwise_and(im, im, mask=fgMask)
+        fg = cv2.bitwise_and(im, im, mask=fgMask)
+
+        if self.configWindow:
+            self.configWindow.addDrawEvent('fg', fg)
+            lrStr = str(round(lr, 7))
+            self.configWindow.addDrawEvent('moglr', lrStr + '0'*(7-len(lrStr)))
+
+        self.lastUpdateTime = time()
+
+        return fg
 
     def resetParameters(self):
         self.backSub = cv2.createBackgroundSubtractorMOG2()

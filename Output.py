@@ -24,6 +24,7 @@ class Output:
                 self.stopOutput()
             if key == ord('s'):
                 self.catchup = not self.catchup
+        cv2.destroyWindow(self.winName)
 
     def imshow(self, im):
         self.frameQueue.put(im)
@@ -33,7 +34,6 @@ class Output:
 
     def stopOutput(self):
         self.run = False
-        cv2.destroyWindow(self.winName)
     
     def getQueueSize(self):
         return self.frameQueue.qsize()

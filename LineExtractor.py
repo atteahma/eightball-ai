@@ -17,9 +17,9 @@ class LineExtractor:
                                  'minLineLength': 15,
                                  'maxLineGap': 20 }
 
-    def getLines(self, fgIm):
+    def getLines(self, fgIm, tol=10):
 
-        onlyLinesIm = 255*np.all(np.isclose(fgIm, 255, atol=10), axis=2).astype(np.uint8)
+        onlyLinesIm = 255*np.all(np.isclose(fgIm, 255, atol=tol), axis=2).astype(np.uint8)
         linesIm = dilate(onlyLinesIm, i=1)
         lines = []
 

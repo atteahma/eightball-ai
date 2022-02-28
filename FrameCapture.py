@@ -8,7 +8,7 @@ from mss.windows import MSS as mss
 from win32 import win32gui
 from dataclasses import dataclass
 import threading
-from time import sleep
+from time import sleep, time
 from math import ceil
 
 
@@ -22,11 +22,18 @@ class FrameCaptureRuntimeData:
 
 class FrameCapture:
 
-    def __init__(self, hwnd, updatePos=False, bufferLen=1000, stepSize=1):
+    def __init__(self, hwnd='', updatePos=False, bufferLen=1000, maxFps=15, stepSize=1, onlyBorders=False):
         self.hwnd = hwnd
         self.bufferLen = bufferLen
         self.updatePos = updatePos
         self.stepSize = stepSize
+        self.maxFps = maxFps
+
+        self.borderBBox = None
+        
+        if onlyBorders:
+            return
+        
         if updatePos:
             self.windowRect = None
         else:
@@ -34,7 +41,6 @@ class FrameCapture:
 
         self.sct = mss()
 
-        self.borderBBox = None
         self.windowsTracesBBox = BBox( (int(40/self.stepSize), int(15/self.stepSize)),
                                        (int(-10/self.stepSize),int(-15/self.stepSize)) )
 
@@ -74,7 +80,9 @@ class FrameCapture:
     
     def captureWindowLoop(self):
         while self.run:
+            tStart = time()
             self.captureWindow()
+            sleep((1/self.maxFps) - (time() - tStart))
 
     def startCapture(self):
         self.captureThread.start()
